@@ -22,14 +22,9 @@ export default function Layout({
   };
   return (
     <div>
-      <div
-        className={cls(
-          !canGoBack ? "justify-center" : "",
-          "bg-white w-full max-w-xl text-lg px-10 font-medium py-3 fixed text-gray-800 border-b top-0  flex items-center"
-        )}
-      >
+      <div className="bg-white w-full h-12 max-w-xl justify-center text-lg px-10 font-medium  fixed text-gray-800 border-b top-0  flex items-center">
         {canGoBack ? (
-          <button onClick={onClick}>
+          <button onClick={onClick} className="absolute left-4">
             <svg
               className="w-6 h-6"
               fill="none"
@@ -46,13 +41,22 @@ export default function Layout({
             </svg>
           </button>
         ) : null}
-        {title ? <span>{title}</span> : null}
+        {title ? (
+          <span className={cls(canGoBack ? "mx-auto" : "", "")}>{title}</span>
+        ) : null}
       </div>
       <div className={cls("pt-6", hasTabBar ? "pb-10" : "")}>{children}</div>
       {hasTabBar ? (
         <nav className="bg-white max-w-xl text-gray-700 border-t fixed bottom-0 w-full px-10 pb-5 pt-3 flex justify-between text-xs">
           <Link legacyBehavior href="/">
-            <a className="flex flex-col items-center space-y-2">
+            <a
+              className={cls(
+                "flex flex-col items-center space-y-2 ",
+                router.pathname === "/"
+                  ? "text-orange-500"
+                  : "hover:text-gray-500 transition-colors"
+              )}
+            >
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -71,7 +75,14 @@ export default function Layout({
             </a>
           </Link>
           <Link legacyBehavior href="/community">
-            <a className="flex flex-col items-center space-y-2">
+            <a
+              className={cls(
+                "flex flex-col items-center space-y-2 ",
+                router.pathname === "/community"
+                  ? "text-orange-500"
+                  : "hover:text-gray-500 transition-colors"
+              )}
+            >
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -90,7 +101,14 @@ export default function Layout({
             </a>
           </Link>
           <Link legacyBehavior href="/chats">
-            <a className="flex flex-col items-center space-y-2">
+            <a
+              className={cls(
+                "flex flex-col items-center space-y-2 ",
+                router.pathname === "/chats"
+                  ? "text-orange-500"
+                  : "hover:text-gray-500 transition-colors"
+              )}
+            >
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -108,8 +126,15 @@ export default function Layout({
               <span>채팅</span>
             </a>
           </Link>
-          <Link legacyBehavior href="/streams">
-            <a className="flex flex-col items-center space-y-2">
+          <Link legacyBehavior href="/live">
+            <a
+              className={cls(
+                "flex flex-col items-center space-y-2 ",
+                router.pathname === "/live"
+                  ? "text-orange-500"
+                  : "hover:text-gray-500 transition-colors"
+              )}
+            >
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -128,7 +153,14 @@ export default function Layout({
             </a>
           </Link>
           <Link legacyBehavior href="/profile">
-            <a className="flex flex-col items-center space-y-2">
+            <a
+              className={cls(
+                "flex flex-col items-center space-y-2 ",
+                router.pathname === "/profile"
+                  ? "text-orange-500"
+                  : "hover:text-gray-500 transition-colors"
+              )}
+            >
               <svg
                 className="w-6 h-6"
                 fill="none"
