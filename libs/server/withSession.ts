@@ -1,4 +1,4 @@
-import { withIronSessionApiRoute } from "iron-session/next/dist";
+import { withIronSessionApiRoute } from "iron-session/next";
 
 declare module "iron-session" {
   interface IronSessionData {
