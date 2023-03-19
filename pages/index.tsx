@@ -4,27 +4,39 @@ import Head from "next/head";
 import FloatingButton from "../components/floating-button";
 import Item from "../components/item";
 import Layout from "../components/layout";
+import useSWR from "swr";
+import { Product } from "@prisma/client";
+
+interface ProductsResponse {
+  ok: boolean;
+  products: Product[];
+}
 
 const Home: NextPage = () => {
-  const user = useUser();
-  console.log(user);
+  const { user, isLoading } = useUser();
+  const { data } = useSWR<ProductsResponse>("/api/products");
+
   return (
     <Layout title="홈" hasTabBar>
       <Head>
         <title>HOME</title>
       </Head>
       <div className="flex flex-col space-y-5 py-10 divide-y">
-        {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
-          <Item
-            id={i}
-            key={i}
-            title="iPhone 14"
-            price={99}
-            comments={1}
-            hearts={1}
-          />
-        ))}
-        <FloatingButton href="/items/upload">
+        {data?.products?.map(
+          (
+            product //ts가 product를 인식하지 못해서 오류, Interface 생성
+          ) => (
+            <Item
+              id={product.id}
+              key={product.id}
+              title={product.name}
+              price={product.price}
+              comments={1}
+              hearts={1}
+            />
+          )
+        )}
+        <FloatingButton href="/products/upload">
           <svg
             className="h-6 w-6"
             xmlns="http://www.w3.org/2000/svg"
