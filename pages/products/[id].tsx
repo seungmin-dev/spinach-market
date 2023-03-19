@@ -4,12 +4,23 @@ import Layout from "@components/layout";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 import Link from "next/link";
+import { Product, User } from "@prisma/client";
+
+interface ProductWithUser extends Product {
+  user: User;
+}
+interface ItemDetailResponse {
+  ok: boolean;
+  product: ProductWithUser;
+  relatedProducts: ProductWithUser[];
+}
 
 const ItemDetail: NextPage = () => {
   const router = useRouter();
-  const { data } = useSWR(
+  const { data } = useSWR<ItemDetailResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
+  console.log(data?.relatedProducts);
   return (
     <Layout canGoBack>
       <div className="px-4 py-4 ">
@@ -65,13 +76,26 @@ const ItemDetail: NextPage = () => {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Similar items</h2>
+
           <div className="mt-6 grid grid-cols-2 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((_, i) => (
-              <div key={i}>
-                <div className="h-56 w-full bg-slate-300 mb-4" />
-                <h3 className="text-sm -mb-1 text-gray-700">Galaxy S60</h3>
-                <span className="text-sm font-medium text-gray-900">$6</span>
-              </div>
+            {data?.relatedProducts?.map((relatedProduct) => (
+              <Link
+                key={relatedProduct.id}
+                legacyBehavior
+                href={`/products/${relatedProduct.id}`}
+              >
+                <a>
+                  <div>
+                    <div className="h-56 w-full bg-slate-300 mb-4" />
+                    <h3 className="text-sm -mb-1 text-gray-700">
+                      {relatedProduct.name}
+                    </h3>
+                    <span className="text-sm font-medium text-gray-900">
+                      ${relatedProduct.price}
+                    </span>
+                  </div>
+                </a>
+              </Link>
             ))}
           </div>
         </div>
