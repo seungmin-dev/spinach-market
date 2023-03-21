@@ -2,9 +2,11 @@ import type { NextPage } from "next";
 import Button from "@components/button";
 import Layout from "@components/layout";
 import { useRouter } from "next/router";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import Link from "next/link";
 import { Product, User } from "@prisma/client";
+import useMutation from "@libs/client/useMutation";
+import { cls } from "@libs/utils";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -13,14 +15,26 @@ interface ItemDetailResponse {
   ok: boolean;
   product: ProductWithUser;
   relatedProducts: ProductWithUser[];
+  isLiked: boolean;
 }
 
 const ItemDetail: NextPage = () => {
   const router = useRouter();
-  const { data } = useSWR<ItemDetailResponse>(
+  const { mutate: unboundMutate } = useSWRConfig();
+  const { data, mutate } = useSWR<ItemDetailResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
-  console.log(data?.relatedProducts);
+
+  const [toggleFav] = useMutation(`/api/products/${router.query.id}/fav`);
+  const onFavClick = () => {
+    if (!data) return;
+    mutate({ ...data, isLiked: !data.isLiked }, false); // 앞의 인자는 일단 유저에게 보여줄 ui, 뒤의 인자는 swr을 통해 새로 fetch 하겠다는 boolean값, false면 fetch X
+    toggleFav({});
+    unboundMutate("/api/users/me", (prev: any) => ({ ok: !prev.ok }), false);
+    // 해당 페이지 외 다른 페이지의 데이터를 변경하고 싶다면 unboundMutate
+    // 여기서는 실제 데이터 변경은 없지만 enter화면으로 이동시켰음
+  };
+
   return (
     <Layout canGoBack>
       <div className="px-4 py-4 ">
@@ -54,22 +68,45 @@ const ItemDetail: NextPage = () => {
             </p>
             <div className="flex items-center justify-between space-x-2">
               <Button large text="Talk to seller" />
-              <button className="p-3 flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-500 rounded-md">
-                <svg
-                  className="h-6 w-6 "
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
+              <button
+                onClick={onFavClick}
+                className={cls(
+                  "p-3 flex items-center justify-center rounded-md hover:bg-gray-100",
+                  data?.isLiked
+                    ? "text-red-400 hover:text-red-500 "
+                    : "text-gray-400 hover:text-gray-500 "
+                )}
+              >
+                {data?.isLiked ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-6 h-6"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="h-6 w-6 "
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
