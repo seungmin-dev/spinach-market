@@ -28,11 +28,9 @@ const ItemDetail: NextPage = () => {
   const [toggleFav] = useMutation(`/api/products/${router.query.id}/fav`);
   const onFavClick = () => {
     if (!data) return;
-    mutate({ ...data, isLiked: !data.isLiked }, false); // 앞의 인자는 일단 유저에게 보여줄 ui, 뒤의 인자는 swr을 통해 새로 fetch 하겠다는 boolean값, false면 fetch X
+    mutate({ ...data, isLiked: !data.isLiked }, false);
     toggleFav({});
     unboundMutate("/api/users/me", (prev: any) => ({ ok: !prev.ok }), false);
-    // 해당 페이지 외 다른 페이지의 데이터를 변경하고 싶다면 unboundMutate
-    // 여기서는 실제 데이터 변경은 없지만 enter화면으로 이동시켰음
   };
 
   return (

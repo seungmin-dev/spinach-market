@@ -7,6 +7,9 @@ import Layout from "../components/layout";
 import useSWR from "swr";
 import { Product } from "@prisma/client";
 
+interface FavsCount extends ProductsResponse {
+  _count: number;
+}
 interface ProductsResponse {
   ok: boolean;
   products: Product[];
@@ -32,7 +35,7 @@ const Home: NextPage = () => {
               title={product.name}
               price={product.price}
               comments={1}
-              hearts={1}
+              hearts={product._count.favs}
             />
           )
         )}
