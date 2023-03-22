@@ -6,7 +6,7 @@ import Layout from "@components/layout";
 const Community: NextPage = () => {
   return (
     <Layout title="동네생활" hasTabBar>
-      <div className="py-16 px-4 space-y-8">
+      <div className="px-4 space-y-8">
         {[1, 2, 3, 4, 5].map((i) => (
           <Link legacyBehavior key={i} href={`/community/${i}`}>
             <a className="flex cursor-pointer flex-col pt-4 items-start">

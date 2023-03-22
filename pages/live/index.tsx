@@ -6,7 +6,7 @@ import Layout from "@components/layout";
 const Stream: NextPage = () => {
   return (
     <Layout title="라이브" hasTabBar>
-      <div className="py-10 divide-y-2 space-y-4">
+      <div className="divide-y-2 space-y-4">
         {[1, 2, 3, 4].map((i) => (
           <Link legacyBehavior key={i} href={`/live/${i}`}>
             <a className="pt-4 block  px-4">

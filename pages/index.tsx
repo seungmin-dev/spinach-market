@@ -24,21 +24,17 @@ const Home: NextPage = () => {
       <Head>
         <title>HOME</title>
       </Head>
-      <div className="flex flex-col space-y-5 py-10 divide-y">
-        {data?.products?.map(
-          (
-            product //ts가 product를 인식하지 못해서 오류, Interface 생성
-          ) => (
-            <Item
-              id={product.id}
-              key={product.id}
-              title={product.name}
-              price={product.price}
-              comments={1}
-              hearts={product._count.favs}
-            />
-          )
-        )}
+      <div className="flex flex-col space-y-5  divide-y">
+        {data?.products?.map((product) => (
+          <Item
+            id={product.id}
+            key={product.id}
+            title={product.name}
+            price={product.price}
+            comments={1}
+            hearts={product._count.favs}
+          />
+        ))}
         <FloatingButton href="/products/upload">
           <svg
             className="h-6 w-6"
