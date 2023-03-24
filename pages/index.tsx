@@ -7,12 +7,14 @@ import Layout from "../components/layout";
 import useSWR from "swr";
 import { Product } from "@prisma/client";
 
-interface FavsCount extends ProductsResponse {
-  _count: number;
+export interface ProductWithCount extends Product {
+  _count: {
+    favs: number;
+  };
 }
 interface ProductsResponse {
   ok: boolean;
-  products: Product[];
+  products: ProductWithCount[];
 }
 
 const Home: NextPage = () => {

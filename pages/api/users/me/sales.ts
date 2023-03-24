@@ -16,10 +16,17 @@ async function handler(
       userId: user?.id,
     },
     include: {
-      product: true,
+      product: {
+        include: {
+          _count: {
+            select: {
+              favs: true,
+            },
+          },
+        },
+      },
     },
   });
-  console.log(sales);
   res.json({
     ok: true,
     sales,
