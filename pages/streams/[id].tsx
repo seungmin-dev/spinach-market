@@ -1,36 +1,85 @@
 import type { NextPage } from "next";
 import Layout from "@components/layout";
 import Message from "@components/message";
+import useSWR, { mutate } from "swr";
+import { useRouter } from "next/router";
+import { Stream } from "@prisma/client";
+import { useForm } from "react-hook-form";
+import useMutation from "@libs/client/useMutation";
+import useUser from "@libs/client/useUser";
+import { useEffect } from "react";
+
+interface StreamMessage {
+  message: string;
+  id: number;
+  user: {
+    avatar?: string;
+    id: number;
+  };
+}
+interface StreamWithMessages extends Stream {
+  messages: StreamMessage[];
+}
+interface StreamResponse {
+  ok: boolean;
+  stream: StreamWithMessages;
+}
+
+interface MessageForm {
+  message: string;
+}
 
 const StreamDetail: NextPage = () => {
+  const { user } = useUser();
+  const router = useRouter();
+  const { register, handleSubmit, reset } = useForm<MessageForm>();
+  const { data, mutate } = useSWR<StreamResponse>(
+    router.query.id ? `/api/streams/${router.query.id}` : null
+  );
+  const [sendMessage, { loading, data: sendMessageData }] = useMutation(
+    `/api/streams/${router.query.id}/messages`
+  );
+  const onValid = (form: MessageForm) => {
+    if (loading) return;
+    reset();
+    sendMessage(form);
+  };
+  useEffect(() => {
+    if (sendMessageData && sendMessageData.ok) {
+      mutate();
+    }
+  }, [sendMessageData, mutate]);
   return (
     <Layout canGoBack>
       <div className="py-10 px-4  space-y-4">
         <div className="w-full rounded-md shadow-sm bg-slate-300 aspect-video" />
         <div className="mt-5">
-          <h1 className="text-3xl font-bold text-gray-900">Galaxy S50</h1>
-          <span className="text-2xl block mt-3 text-gray-900">$140</span>
-          <p className=" my-6 text-gray-700">
-            My money&apos;s in that office, right? If she start giving me some
-            bullshit about it ain&apos;t there, and we got to go someplace else
-            and get it, I&apos;m gonna shoot you in the head then and there.
-            Then I&apos;m gonna shoot that bitch in the kneecaps, find out where
-            my goddamn money is. She gonna tell me too. Hey, look at me when
-            I&apos;m talking to you, motherfucker. You listen: we go in there,
-            and that ni**a Winston or anybody else is in there, you the first
-            motherfucker to get shot. You understand?
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {data?.stream.name}
+          </h1>
+          <span className="text-2xl block mt-3 text-gray-900">
+            {data?.stream.price}
+          </span>
+          <p className=" my-6 text-gray-700">{data?.stream.description}</p>
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Live Chat</h2>
           <div className="py-10 pb-16 h-[50vh] overflow-y-scroll  px-4 space-y-4">
-            <Message message="Hi how much are you selling them for?" />
-            <Message message="I want ￦20,000" reversed />
-            <Message message="미쳤어" />
+            {data?.stream.messages.map((message) => (
+              <Message
+                key={message.id}
+                message={message.message}
+                reversed={message.user.id === user?.id}
+              />
+            ))}
           </div>
-          <div className="fixed py-2 bg-white  bottom-0 inset-x-0">
+          <form
+            onSubmit={handleSubmit(onValid)}
+            className="fixed py-2 bg-white  bottom-0 inset-x-0"
+          >
             <div className="flex relative max-w-md items-center  w-full mx-auto">
               <input
+                {...register("message", { required: true })}
                 type="text"
                 className="shadow-sm rounded-full w-full border-gray-300 focus:ring-orange-500 focus:outline-none pr-12 focus:border-orange-500"
               />
@@ -40,7 +89,7 @@ const StreamDetail: NextPage = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </Layout>
