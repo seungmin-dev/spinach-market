@@ -7,6 +7,7 @@ import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 import { useInfiniteScroll } from "@libs/client/useInfiniteScroll";
 import { useEffect } from "react";
+import Image from "next/image";
 
 interface StreamsResponse {
   ok: boolean;
