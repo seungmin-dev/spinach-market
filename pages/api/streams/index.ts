@@ -48,11 +48,16 @@ async function handler(
     res.json({ ok: true, stream });
   }
   if (req.method === "GET") {
+    const { page } = req.query;
     const streams = await client.stream.findMany({
       take: 10,
+      skip: Number(page) * 10,
+      orderBy: {
+        id: "asc",
+      },
     });
     console.log(streams);
-    res.json({ ok: true, streams, page: 0 });
+    res.json({ ok: true, streams });
   }
 }
 

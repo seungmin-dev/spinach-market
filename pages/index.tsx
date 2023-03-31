@@ -22,9 +22,9 @@ interface ProductsResponse {
 }
 
 const getKey = (pageIndex: number, previousPageData: ProductsResponse) => {
-  if (pageIndex === 0) return `/api/products?page=1`;
-  if (pageIndex + 1 > previousPageData.pages) return null;
-  return `/api/products?page=${pageIndex + 1}`;
+  if (pageIndex === 0) return `/api/streams?page=0`;
+  if (pageIndex === previousPageData.pages) return null;
+  if (pageIndex > 0) return `/api/streams?page=${pageIndex + 1}`;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -33,6 +33,7 @@ const Home: NextPage = () => {
   const { user, isLoading } = useUser();
   const { data, setSize } = useSWRInfinite<ProductsResponse>(getKey, fetcher);
   const products = data ? data.map((item) => item.products).flat() : [];
+  console.log(products);
   const page = useInfiniteScroll();
   useEffect(() => {
     setSize(page);
