@@ -24,7 +24,6 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 const Streams: NextPage = () => {
   const { data, setSize } = useSWRInfinite<StreamsResponse>(getKey, fetcher);
   const streams = data ? data.map((item) => item.streams).flat() : [];
-  console.log("streams : ", streams);
   const page = useInfiniteScroll();
   useEffect(() => {
     setSize(page);

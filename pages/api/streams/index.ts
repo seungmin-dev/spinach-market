@@ -56,7 +56,6 @@ async function handler(
         id: "asc",
       },
     });
-    console.log(streams);
     res.json({ ok: true, streams });
   }
 }

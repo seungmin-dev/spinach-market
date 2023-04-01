@@ -22,9 +22,9 @@ interface ProductsResponse {
 }
 
 const getKey = (pageIndex: number, previousPageData: ProductsResponse) => {
-  if (pageIndex === 0) return `/api/streams?page=0`;
+  if (pageIndex === 0) return `/api/products?page=0`;
   if (pageIndex === previousPageData.pages) return null;
-  if (pageIndex > 0) return `/api/streams?page=${pageIndex + 1}`;
+  if (pageIndex > 0) return `/api/products?page=${pageIndex + 1}`;
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -46,12 +46,12 @@ const Home: NextPage = () => {
       <div className="flex flex-col space-y-5  divide-y">
         {products?.map((product) => (
           <Item
-            id={product.id}
-            key={product.id}
-            title={product.name}
-            price={product.price}
+            id={product?.id}
+            key={product?.id}
+            title={product?.name}
+            price={product?.price}
             comments={1}
-            hearts={product._count.favs}
+            hearts={product?._count.favs}
           />
         ))}
         <FloatingButton href="/products/upload">
