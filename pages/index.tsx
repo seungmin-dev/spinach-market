@@ -4,9 +4,10 @@ import Head from "next/head";
 import FloatingButton from "../components/floating-button";
 import Item from "../components/item";
 import Layout from "../components/layout";
-import useSWR from "swr";
+import useSWR, { SWRConfig } from "swr";
 import useSWRInfinite from "swr/infinite";
 import { Product } from "@prisma/client";
+import client from "@libs/server/client";
 import { useEffect } from "react";
 import { useInfiniteScroll } from "@libs/client/useInfiniteScroll";
 
@@ -33,7 +34,6 @@ const Home: NextPage = () => {
   const { user, isLoading } = useUser();
   const { data, setSize } = useSWRInfinite<ProductsResponse>(getKey, fetcher);
   const products = data ? data.map((item) => item.products).flat() : [];
-  console.log(products);
   const page = useInfiniteScroll();
   useEffect(() => {
     setSize(page);
@@ -51,7 +51,7 @@ const Home: NextPage = () => {
             title={product?.name}
             price={product?.price}
             comments={1}
-            hearts={product?._count.favs}
+            hearts={product?._count?.favs || 0}
           />
         ))}
         <FloatingButton href="/products/upload">
@@ -76,4 +76,30 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+const Page: NextPage<{ products: ProductWithCount[] }> = ({ products }) => {
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          "/api/products": {
+            ok: true,
+            products,
+          },
+        },
+      }}
+    >
+      <Home />
+    </SWRConfig>
+  );
+};
+
+export async function getServerSideProps() {
+  const products = await client.product.findMany({});
+  return {
+    props: {
+      products: JSON.parse(JSON.stringify(products)),
+    },
+  };
+}
+
+export default Page;
