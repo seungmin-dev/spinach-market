@@ -1,11 +1,13 @@
-import type { NextPage } from "next";
+import type { NextPage, NextPageContext } from "next";
 import Link from "next/link";
 import Layout from "@components/layout";
 import useUser from "@libs/client/useUser";
-import useSWR from "swr";
+import useSWR, { SWRConfig } from "swr";
 import { Review, User } from "@prisma/client";
+import client from "@libs/server/client";
 import { cls } from "@libs/utils";
 import Image from "next/image";
+import { withSsrSession } from "@libs/server/withSession";
 
 interface ReviewWithUser extends Review {
   createdBy: User;
@@ -27,6 +29,8 @@ const Profile: NextPage = () => {
               alt="avatar image"
               src={`https://imagedelivery.net/AvN1NVAjekwSxRd3GpTRNw/${user?.avatar}/public`}
               className="w-16 h-16 bg-slate-500 rounded-full"
+              width={16}
+              height={16}
             />
           ) : (
             <div className="w-16 h-16 bg-slate-500 rounded-full" />
@@ -148,4 +152,29 @@ const Profile: NextPage = () => {
   );
 };
 
-export default Profile;
+const Page: NextPage<{ profile: User }> = ({ profile }) => {
+  return (
+    <SWRConfig
+      value={{
+        fallback: {
+          "/api/users/me": { ok: true, profile },
+        },
+      }}
+    >
+      <Profile />
+    </SWRConfig>
+  );
+};
+
+export const getServerSideProps = withSsrSession(async function ({
+  req, // context.req
+}: NextPageContext) {
+  const profile = await client.user.findUnique({
+    where: { id: req?.session.user?.id },
+  });
+  return {
+    props: { profile: JSON.parse(JSON.stringify(profile)) },
+  };
+});
+
+export default Page;
