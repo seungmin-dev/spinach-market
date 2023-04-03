@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 
 const DynamicComponentExample = dynamic(
+  //@ts-ignore
   () =>
     new Promise((resolve) =>
       setTimeout(

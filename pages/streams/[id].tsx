@@ -85,12 +85,12 @@ const StreamDetail: NextPage = () => {
           <div className="bg-orange-300 flex flex-col space-y-1 text-sm p-4 rounded-sm overflow-y-scroll">
             <span>Stream Keys (secret)</span>
             <span className="text-gray-600">
-              <span className=" text-gray-800">URL : </span>"
-              {data?.stream.cloudflareUrl}"
+              <span className=" text-gray-800">URL : </span>
+              {data?.stream.cloudflareUrl}
             </span>
             <span className="text-gray-600">
-              <span className=" text-gray-800">Key : </span>"
-              {data?.stream.cloudflareKey}"
+              <span className=" text-gray-800">Key : </span>
+              {data?.stream.cloudflareKey}
             </span>
           </div>
         </div>

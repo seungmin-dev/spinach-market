@@ -47,7 +47,6 @@ const Create: NextPage = () => {
           register={register("price", { required: true, valueAsNumber: true })}
           required
           label="Price"
-          placeholder="0.00"
           name="price"
           type="text"
           kind="price"
