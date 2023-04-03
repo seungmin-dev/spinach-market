@@ -6,6 +6,11 @@ import Input from "../components/input";
 import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/utils";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
+
+const DynamicComponentExample = dynamic(
+  () => import("@components/dynamicComponentExample")
+); //option : {ssr:true/false}
 
 interface EnterForm {
   email?: string;
@@ -118,14 +123,17 @@ const Enter: NextPage = () => {
                 />
               ) : null}
               {method === "phone" ? (
-                <Input
-                  register={register("phone")}
-                  name="phone"
-                  label="Phone number"
-                  type="number"
-                  kind="phone"
-                  required
-                />
+                <>
+                  <DynamicComponentExample />
+                  <Input
+                    register={register("phone")}
+                    name="phone"
+                    label="Phone number"
+                    type="number"
+                    kind="phone"
+                    required
+                  />
+                </>
               ) : null}
               {method === "email" ? (
                 <Button text={loading ? "loading" : "Get login link"} />
