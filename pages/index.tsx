@@ -39,7 +39,7 @@ const Home: NextPage = () => {
     setSize(page);
   }, [setSize, page]);
   return (
-    <Layout title="홈" hasTabBar>
+    <Layout title="홈" hasTabBar seoTitle="홈">
       <Head>
         <title>HOME</title>
       </Head>

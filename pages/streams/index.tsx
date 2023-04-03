@@ -30,7 +30,7 @@ const Streams: NextPage = () => {
   }, [setSize, page]);
 
   return (
-    <Layout title="라이브" hasTabBar>
+    <Layout title="라이브" hasTabBar seoTitle="라이브">
       <div className="divide-y-2 space-y-4">
         {streams.map((stream) => (
           <Link legacyBehavior key={stream.id} href={`/streams/${stream.id}`}>
