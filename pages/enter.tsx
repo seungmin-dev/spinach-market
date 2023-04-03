@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { FieldError, FieldErrors, useForm } from "react-hook-form";
 import Button from "../components/button";
 import Input from "../components/input";
@@ -9,8 +9,18 @@ import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 
 const DynamicComponentExample = dynamic(
-  () => import("@components/dynamicComponentExample")
-); //option : {ssr:true/false}
+  () =>
+    new Promise((resolve) =>
+      setTimeout(
+        () => resolve(import("@components/dynamicComponentExample")),
+        10000
+      )
+    ),
+  {
+    ssr: false,
+    loading: () => <span>loading a big component</span>,
+  }
+);
 
 interface EnterForm {
   email?: string;
@@ -124,7 +134,9 @@ const Enter: NextPage = () => {
               ) : null}
               {method === "phone" ? (
                 <>
-                  <DynamicComponentExample />
+                  <Suspense fallback={<span>Loading suspense</span>}>
+                    <DynamicComponentExample />
+                  </Suspense>
                   <Input
                     register={register("phone")}
                     name="phone"
