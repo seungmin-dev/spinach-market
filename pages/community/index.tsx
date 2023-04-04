@@ -5,6 +5,7 @@ import Layout from "@components/layout";
 import useSWR from "swr";
 import { Post, User } from "@prisma/client";
 import useCoords from "@libs/client/useCoords";
+import client from "@libs/server/client";
 
 interface PostsWithUser extends Post {
   user: User;
@@ -14,21 +15,20 @@ interface PostsWithUser extends Post {
   };
 }
 interface PostsResponse {
-  ok: boolean;
   posts: PostsWithUser[];
 }
 
-const Community: NextPage = () => {
-  const { latitude, longitude } = useCoords();
-  const { data } = useSWR<PostsResponse>(
-    latitude && longitude
-      ? `/api/posts?latitude=${latitude}&longitude=${longitude}`
-      : null
-  );
+const Community: NextPage<PostsResponse> = ({ posts }) => {
+  // const { latitude, longitude } = useCoords();
+  // const { data } = useSWR<PostsResponse>(
+  //   latitude && longitude
+  //     ? `/api/posts?latitude=${latitude}&longitude=${longitude}`
+  //     : null
+  // );
   return (
     <Layout title="동네생활" hasTabBar seoTitle="동네생활">
       <div className="px-4 space-y-8">
-        {data?.posts?.map((post) => (
+        {posts?.map((post) => (
           <Link legacyBehavior key={post.id} href={`/community/${post.id}`}>
             <a className="flex cursor-pointer flex-col pt-4 items-start">
               <span className="flex ml-4 items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -101,5 +101,16 @@ const Community: NextPage = () => {
     </Layout>
   );
 };
+
+export async function getStaticProps() {
+  const posts = await client.post.findMany({ include: { user: true } });
+  return {
+    props: {
+      posts: JSON.parse(JSON.stringify(posts)),
+    },
+    revalidate: 20,
+    // ISR 테스트하려면 빌드 후 실제서버에서 테스트해야함
+  };
+}
 
 export default Community;

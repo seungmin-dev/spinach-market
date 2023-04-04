@@ -18,7 +18,6 @@ const Post: NextPage<{ post: string; data: any }> = ({ post, data }) => {
 };
 
 export function getStaticPaths() {
-  // 동적인 URL을 갖는 페이지에서 getStaticProps를 사용할 때 필요
   const files = readdirSync("./posts").map((file) => {
     const [name, extension] = file.split(".");
     return { params: { slug: name } };
