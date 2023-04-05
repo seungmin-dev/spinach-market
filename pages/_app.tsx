@@ -22,14 +22,14 @@ function MyApp({ Component, pageProps }: AppProps) {
         src="https://connect.facebook.net/en_US/sdk.js"
         onLoad={() => {
           //onLoad : 외부스크립트가 다 다운로드 되어야지만 실행되는 함수
-          window.fbAsyncInit = function () {
-            FB.init({
-              appId: "your-app-id",
-              autoLogAppEvents: true,
-              xfbml: true,
-              version: "v13.0",
-            });
-          };
+          // window.fbAsyncInit = function () {
+          //   FB.init({
+          //     appId: "your-app-id",
+          //     autoLogAppEvents: true,
+          //     xfbml: true,
+          //     version: "v13.0",
+          //   });
+          // };
         }}
       />
     </SWRConfig>

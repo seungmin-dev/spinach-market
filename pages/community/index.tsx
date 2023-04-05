@@ -108,7 +108,7 @@ export async function getStaticProps() {
     props: {
       posts: JSON.parse(JSON.stringify(posts)),
     },
-    revalidate: 20,
+    // revalidate: 20, // ODR 이용하면 삭제해도 됨
     // ISR 테스트하려면 빌드 후 실제서버에서 테스트해야함
   };
 }

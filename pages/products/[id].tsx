@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
 import Button from "@components/button";
 import Layout from "@components/layout";
 import { useRouter } from "next/router";
@@ -8,6 +8,7 @@ import { Product, User } from "@prisma/client";
 import useMutation from "@libs/client/useMutation";
 import { cls } from "@libs/utils";
 import Image from "next/image";
+import client from "@libs/server/client";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -19,29 +20,41 @@ interface ItemDetailResponse {
   isLiked: boolean;
 }
 
-const ItemDetail: NextPage = () => {
+const ItemDetail: NextPage<ItemDetailResponse> = ({
+  product,
+  relatedProducts,
+  isLiked,
+}) => {
   const router = useRouter();
   const { mutate: unboundMutate } = useSWRConfig();
   const { data, mutate } = useSWR<ItemDetailResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
 
-  const [toggleFav] = useMutation(`/api/products/${router.query.id}/fav`);
-  const onFavClick = () => {
-    if (!data) return;
-    mutate({ ...data, isLiked: !data.isLiked }, false);
-    toggleFav({});
-    unboundMutate("/api/users/me", (prev: any) => ({ ok: !prev.ok }), false);
-  };
+  if (router.isFallback) {
+    return (
+      <Layout title="loading ..." seoTitle="loading ...">
+        <span>Plz wait</span>
+      </Layout>
+    );
+  }
+
+  // const [toggleFav] = useMutation(`/api/products/${router.query.id}/fav`);
+  // const onFavClick = () => {
+  //   if (!data) return;
+  //   mutate({ ...data, isLiked: !data.isLiked }, false);
+  //   toggleFav({});
+  //   unboundMutate("/api/users/me", (prev: any) => ({ ok: !prev.ok }), false);
+  // };
 
   return (
-    <Layout canGoBack seoTitle={`${data?.product?.name}`}>
+    <Layout canGoBack seoTitle={`${product?.name}`}>
       <div className="px-4 py-4 ">
         <div className="mb-8">
           <div className="relative pb-96">
             <Image
               alt="product image"
-              src={`https://imagedelivery.net/AvN1NVAjekwSxRd3GpTRNw/${data?.product.image}/public`}
+              src={`https://imagedelivery.net/AvN1NVAjekwSxRd3GpTRNw/${product.image}/public`}
               className="bg-slate-300 object-cover"
               fill
             />
@@ -50,7 +63,7 @@ const ItemDetail: NextPage = () => {
             {data?.product.user.avatar ? (
               <Image
                 alt="avatar image"
-                src={`https://imagedelivery.net/AvN1NVAjekwSxRd3GpTRNw/${data?.product.user.avatar}/avatar`}
+                src={`https://imagedelivery.net/AvN1NVAjekwSxRd3GpTRNw/${product.user.avatar}/avatar`}
                 width={48}
                 height={48}
                 className="w-12 h-12 rounded-full"
@@ -60,11 +73,11 @@ const ItemDetail: NextPage = () => {
             )}
             <div>
               <p className="text-sm font-medium text-gray-700">
-                {data?.product?.user?.name}
+                {product?.user?.name}
               </p>
               <Link
                 legacyBehavior
-                href={`/users/profiles/${data?.product?.user?.id}`}
+                href={`/users/profiles/${product?.user?.id}`}
               >
                 <a className="text-xs font-medium text-gray-500">
                   View profile &rarr;
@@ -74,26 +87,26 @@ const ItemDetail: NextPage = () => {
           </div>
           <div className="mt-5">
             <h1 className="text-3xl font-bold text-gray-900">
-              {data?.product?.name}
+              {product?.name}
             </h1>
             <p className="text-3xl block mt-3 text-gray-900">
-              ${data?.product?.price}
+              {product?.price}
             </p>
             <p className="text-base my-6 text-gray-700">
-              {data?.product?.description}
+              {product?.description}
             </p>
             <div className="flex items-center justify-between space-x-2">
               <Button large text="Talk to seller" />
               <button
-                onClick={onFavClick}
+                // onClick={onFavClick}
                 className={cls(
                   "p-3 flex items-center justify-center rounded-md hover:bg-gray-100",
-                  data?.isLiked
+                  isLiked
                     ? "text-red-400 hover:text-red-500 "
                     : "text-gray-400 hover:text-gray-500 "
                 )}
               >
-                {data?.isLiked ? (
+                {isLiked ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -131,7 +144,8 @@ const ItemDetail: NextPage = () => {
           <h2 className="text-2xl font-bold text-gray-900">Similar items</h2>
 
           <div className="mt-6 grid grid-cols-2 gap-4">
-            {data?.relatedProducts?.map((relatedProduct) => (
+            $
+            {relatedProducts?.map((relatedProduct) => (
               <Link
                 key={relatedProduct.id}
                 legacyBehavior
@@ -155,6 +169,68 @@ const ItemDetail: NextPage = () => {
       </div>
     </Layout>
   );
+};
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [], // 프로젝트 빌드할 때 아무 페이지도 미리 생성하지 않음
+    fallback: true, // true, false, "blocking"
+  };
+};
+
+export const getStaticProps: GetStaticProps = async (ctx) => {
+  if (!ctx?.params?.id) {
+    return {
+      props: {},
+    };
+  }
+
+  const product = await client.product.findUnique({
+    where: {
+      id: +ctx.params.id!.toString(),
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+  });
+  const terms = product?.name.split(" ").map((word) => ({
+    name: {
+      contains: word,
+    },
+  }));
+  const relatedProducts = await client.product.findMany({
+    where: {
+      OR: terms,
+      AND: {
+        id: {
+          not: product?.id,
+        },
+      },
+    },
+  });
+  const isLiked = false;
+  // Boolean(
+  //   await client.fav.findFirst({
+  //     where: {
+  //       productId: product?.id,
+  //       userId: user?.id,
+  //     },
+  //   })
+  // );
+
+  return {
+    props: {
+      product: JSON.parse(JSON.stringify(product)),
+      relatedProducts: JSON.parse(JSON.stringify(relatedProducts)),
+      isLiked,
+    },
+  };
 };
 
 export default ItemDetail;
