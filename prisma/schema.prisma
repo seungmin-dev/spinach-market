@@ -41,6 +41,8 @@ model Token {
   userId    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Product {
@@ -57,6 +59,8 @@ model Product {
   sales       Sale[]
   purchases   Purchase[]
   records     Record[]
+
+  @@index([userId])
 }
 
 model Post {
@@ -70,6 +74,8 @@ model Post {
   longitude Float?
   answers   Answer[]
   wondering Wondering[]
+
+  @@index([userId])
 }
 
 model Answer {
@@ -81,6 +87,8 @@ model Answer {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    Int
   answer    String   @db.MediumText
+
+  @@index([userId, postId])
 }
 
 model Wondering {
@@ -91,6 +99,8 @@ model Wondering {
   userId    Int
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId    Int
+
+  @@index([userId, postId])
 }
 
 model Review {
@@ -103,10 +113,8 @@ model Review {
   createdFor   User     @relation(name: "receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
   createdForId Int
   score        Int      @default(1)
-  // 기존재하는 모델에 컬럼을 추가할 때 옵션
-  // - 디폴트값 정하기
-  // - 필수가 아닌 값으로 지정하기
-  // - 데이터 리셋
+
+  @@index([createdForId])
 }
 
 model Fav {
@@ -117,6 +125,8 @@ model Fav {
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId, productId])
 }
 
 model Purchase {
@@ -127,6 +137,8 @@ model Purchase {
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId, productId])
 }
 
 model Sale {
@@ -137,6 +149,8 @@ model Sale {
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId, productId])
 }
 
 model Record {
@@ -148,6 +162,8 @@ model Record {
   kind      Kind
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId, productId])
 }
 
 enum Kind {
@@ -169,6 +185,8 @@ model Stream {
   cloudflareId  String
   cloudflareUrl String
   cloudflareKey String
+
+  @@index([userId])
 }
 
 model Message {
@@ -180,4 +198,6 @@ model Message {
   message   String   @db.MediumText
   stream    Stream   @relation(fields: [streamId], references: [id], onDelete: Cascade)
   streamId  Int
+
+  @@index([userId, streamId])
 }
